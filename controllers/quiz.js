@@ -84,6 +84,7 @@ router.get('/:quizId/result',async(req,res)=>
   try
   {
     const quiz = await Quiz.findById(req.params.quizId)
+    if(!quiz) return res.json({error: 'Quiz not found'})
     if(quiz.endDate>=new Date()) return res.json({error: 'Quiz is not finished yet'})
     if(new Date().getTime() - quiz.endDate.getTime() > 5*60*1e3) res.json({data: quiz.rightAnswer})
     else res.json({error: 'Wait for 5 mins after quiz end'})
