@@ -1,10 +1,11 @@
 import { Router } from "express";
 import Quiz from "../models/quiz.js";
 import cronjob from "./cronjob.js";
+import middleware from "./users-ip.js";
 
 const router=Router()
 
-router.post('/',async(req,res)=>
+router.post('/',middleware,async(req,res)=>
 {
   const {question,options,rightAnswer,startDate,endDate}=req.body
   let quiz=new Quiz({question,options,rightAnswer,startDate,endDate})
