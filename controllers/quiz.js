@@ -1,5 +1,6 @@
 import { Router } from "express";
 import Quiz from "../models/quiz.js";
+import cronjob from "./cronjob.js";
 
 const router=Router()
 
@@ -17,7 +18,41 @@ router.post('/',async(req,res)=>
   try
   {
     quiz = await quiz.save()
+    let scheduleResult=await cronjob(quiz._id,startTime,'active')
+    if(scheduleResult.error) return res.json(scheduleResult)
+    scheduleResult=await cronjob(quiz._id,endTime,'finished')
+    if(scheduleResult.error) return res.json(scheduleResult)
     res.json({data: quiz})
+  }
+  catch(e)
+  {
+    console.error(e);
+    res.json({error:'Internal server error'})
+  }
+})
+
+// set quiz status using cron job
+router.post('/:quizId/status',async(req,res)=>
+{
+  const {quizId}=req.params, {status}=req.body
+  try
+  {
+    const quiz=await Quiz.findByIdAndUpdate(quizId,{status},{returnDocument: 'after'})
+    res.json({data: quiz})
+  }
+  catch(e)
+  {
+    console.error(e);
+    res.json({error:'Internal server error'})
+  }
+})
+
+router.get('/all',async(_,res)=>
+{
+  try
+  {
+    const quizzes = await Quiz.find()
+    res.json({data: quizzes})
   }
   catch(e)
   {
