@@ -5,7 +5,7 @@ import middleware from "./users-ip.js";
 
 const router=Router()
 
-router.post('/',middleware,async(req,res)=>
+router.post('/',async(req,res,next)=>
 {
   const {question,options,rightAnswer,startDate,endDate}=req.body
   let quiz=new Quiz({question,options,rightAnswer,startDate,endDate})
@@ -16,7 +16,7 @@ router.post('/',middleware,async(req,res)=>
 
   const startTime=new Date(startDate).getTime()
   const endTime=new Date(endDate).getTime()
-  if(endTime<startTime+15*60*1e3 || endTime>startTime+60*60*1e3) return res.json({error: 'Quiz duration should be between 15 and 60 mins'})
+  if(endTime<startTime+5*60*1e3 || endTime>startTime+60*60*1e3) return res.json({error: 'Quiz duration should be between 5 and 60 mins'})
 
   try
   {
@@ -26,13 +26,14 @@ router.post('/',middleware,async(req,res)=>
     scheduleResult=await cronjob(quiz.id,endTime,'finished')
     if(scheduleResult.error) return res.json(scheduleResult)
     res.json({data: quiz})
+    next()
   }
   catch(e)
   {
     console.error(e);
     res.json({error:'Internal server error'})
   }
-})
+},middleware)
 
 // set quiz status using cron job
 router.post('/:quizId/status',async(req,res)=>
