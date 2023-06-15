@@ -20,9 +20,9 @@ router.post('/',async(req,res)=>
   try
   {
     quiz = await quiz.save()
-    let scheduleResult=await cronjob(quiz._id,startTime,'active')
+    let scheduleResult=await cronjob(quiz.id,startTime,'active')
     if(scheduleResult.error) return res.json(scheduleResult)
-    scheduleResult=await cronjob(quiz._id,endTime,'finished')
+    scheduleResult=await cronjob(quiz.id,endTime,'finished')
     if(scheduleResult.error) return res.json(scheduleResult)
     res.json({data: quiz})
   }
@@ -55,6 +55,36 @@ router.get('/all',async(_,res)=>
   {
     const quizzes = await Quiz.find()
     res.json({data: quizzes})
+  }
+  catch(e)
+  {
+    console.error(e);
+    res.json({error:'Internal server error'})
+  }
+})
+
+router.get('/active',async(_,res)=>
+{
+  try
+  {
+    const quiz = await Quiz.findOne({status: 'active'}).exec()
+    res.json({data: quiz})
+  }
+  catch(e)
+  {
+    console.error(e);
+    res.json({error:'Internal server error'})
+  }
+})
+
+router.get('/:quizId/result',async(req,res)=>
+{
+  try
+  {
+    const quiz = await Quiz.findById(req.params.quizId)
+    if(quiz.endDate>=new Date()) return res.json({error: 'Quiz is not finished yet'})
+    if(new Date().getTime() - quiz.endDate.getTime() > 5*60*1e3) res.json({data: quiz.rightAnswer})
+    else res.json({error: 'Wait for 5 mins after quiz end'})
   }
   catch(e)
   {

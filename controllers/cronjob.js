@@ -4,6 +4,7 @@ dotenv.config()
 
 export default async function cronjob(quizId,scheduledTime,status)
 {
+  console.log(quizId,scheduledTime,status);
   let scheduleResult=await fetch(`https://qstash.upstash.io/v1/publish/${process.env.backend_url}/quizzes/${quizId}/status`,
   {
     method: 'POST',
@@ -11,7 +12,7 @@ export default async function cronjob(quizId,scheduledTime,status)
     {
       'Content-Type':'application/json',
       'Authorization':`Bearer ${process.env.cron_api}`,
-      'Upstash-Not-Before': scheduledTime
+      'Upstash-Not-Before': Math.ceil(scheduledTime/1e3)
     },
     body: JSON.stringify({status})
   })
