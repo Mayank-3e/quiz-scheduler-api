@@ -16,7 +16,12 @@ const schema=new Schema({
   },
   rightAnswer: {
     type: Number,
-    required: [true,'Right answer is required']
+    required: [true,'Right answer is required'],
+    validate:
+    {
+      validator: (v) => v>=0,
+      message: 'Provide 0-indexed right answer with appropriate index'
+    }
   },
   startDate: {
     type: Date,

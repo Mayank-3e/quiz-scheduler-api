@@ -11,6 +11,8 @@ router.post('/',async(req,res)=>
   let errors=quiz.validateSync()
   if(errors) return res.json(errors)
 
+  if(rightAnswer>=options.length) return res.json({error: 'Provide 0-indexed right answer with appropriate index'})
+
   const startTime=new Date(startDate).getTime()
   const endTime=new Date(endDate).getTime()
   if(endTime<startTime+15*60*1e3 || endTime>startTime+60*60*1e3) return res.json({error: 'Quiz duration should be between 15 and 60 mins'})
